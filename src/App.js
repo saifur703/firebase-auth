@@ -54,7 +54,9 @@ function App() {
           isSignedIn: false,
           email: '',
           name: '',
-          photo: ''
+          photo: '',
+          password: '',
+          error: ''
         };
         setUser(signedOutUser);
       })
@@ -62,6 +64,48 @@ function App() {
         console.log(err);
         console.log(err.message);
       });
+  };
+
+  const is_valid_email = email =>
+    /^[a-zA-Z0-9]+@(?:[a-zA-Z0-9]+\.)+[A-Za-z]+$/.test(email);
+
+  const handleChange = e => {
+    const newUserInfo = {
+      ...user
+    };
+    newUserInfo[e.target.name] = e.target.value;
+    setUser(newUserInfo);
+    // console.log(newUserInfo);
+    // console.log(e.target.name, e.target.email, e.target.password);
+
+    if (e.target.name === 'email') {
+      console.log(is_valid_email(e.target.value));
+    }
+  };
+  const createAccount = e => {
+    e.preventDefault();
+
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(user.email, user.password)
+      .then(res => {
+        console.log(res);
+        const createdUser = { ...user };
+        createdUser.isSignedIn = true;
+        setUser(createdUser);
+      })
+      .catch(err => {
+        console.log(err);
+        console.log(err.message);
+        const createdUser = { ...user };
+        createdUser.isSignedIn = false;
+        createdUser.error = err.message;
+        setUser(createdUser);
+      });
+
+    document.getElementById('name').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('password').value = '';
   };
   return (
     <div className='App'>
@@ -76,7 +120,7 @@ function App() {
           Sign In
         </button>
       )}
-
+      {user.error && <p style={{ color: 'red' }}>{user.error}</p>}
       {user.isSignedIn && (
         <React.Fragment>
           <p>
@@ -91,6 +135,36 @@ function App() {
           </p>
         </React.Fragment>
       )}
+      <div className='custom-form'>
+        <h2>Our Custom Authentication</h2>
+        <form onSubmit={createAccount}>
+          <input
+            onBlur={handleChange}
+            type='text'
+            name='name'
+            id='name'
+            placeholder='Your Name'
+            required
+          />
+          <input
+            onBlur={handleChange}
+            type='email'
+            name='email'
+            id='email'
+            placeholder='Your Email'
+            required
+          />
+          <input
+            onBlur={handleChange}
+            type='password'
+            name='password'
+            id='password'
+            placeholder='Your Password'
+            required
+          />
+          <button onClick={createAccount}>Create Account</button>
+        </form>
+      </div>
     </div>
   );
 }
