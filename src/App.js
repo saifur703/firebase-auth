@@ -43,12 +43,40 @@ function App() {
         console.log(err.message);
       });
   };
+  const signOutHandler = () => {
+    // alert('Sign Out');
+
+    firebase
+      .auth()
+      .signOut()
+      .then(res => {
+        const signedOutUser = {
+          isSignedIn: false,
+          email: '',
+          name: '',
+          photo: ''
+        };
+        setUser(signedOutUser);
+      })
+      .catch(err => {
+        console.log(err);
+        console.log(err.message);
+      });
+  };
   return (
     <div className='App'>
       <h2>Welcome To Firebase Auth and React JS</h2>
-      <button style={btnStyle} onClick={signInHandler}>
-        Sign In
-      </button>
+
+      {user.isSignedIn ? (
+        <button style={btnStyle} onClick={signOutHandler}>
+          Sign Out
+        </button>
+      ) : (
+        <button style={btnStyle} onClick={signInHandler}>
+          Sign In
+        </button>
+      )}
+
       {user.isSignedIn && (
         <React.Fragment>
           <p>
